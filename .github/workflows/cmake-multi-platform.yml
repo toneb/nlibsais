@@ -69,14 +69,13 @@ jobs:
       run: >
         cmake -B build
         -DCMAKE_C_COMPILER=clang
-        -DCMAKE_BUILD_TYPE=Release
         -DLIBSAIS_BUILD_SHARED_LIB=ON
         -DCMAKE_C_FLAGS="-Ofast"
         -A x64
         -S libsais
 
     - name: Build x64
-      run: cmake --build ${{ steps.strings.outputs.build-output-dir }} --config Release
+      run: cmake --build build --config Release
 
     - name: Upload build artifacts
       uses: actions/upload-artifact@v3
@@ -89,14 +88,13 @@ jobs:
       run: >
         cmake -B build
         -DCMAKE_C_COMPILER=clang
-        -DCMAKE_BUILD_TYPE=Release
         -DLIBSAIS_BUILD_SHARED_LIB=ON
         -DCMAKE_C_FLAGS="-Ofast"
         -A Win32
         -S libsais
 
     - name: Build x86
-      run: cmake --build ${{ steps.strings.outputs.build-output-dir }} --config Release
+      run: cmake --build build --config Release
 
     - name: Upload build artifacts
       uses: actions/upload-artifact@v3
@@ -109,14 +107,13 @@ jobs:
       run: >
         cmake -B build
         -DCMAKE_C_COMPILER=clang
-        -DCMAKE_BUILD_TYPE=Release
         -DLIBSAIS_BUILD_SHARED_LIB=ON
         -DCMAKE_C_FLAGS="-Ofast"
         -A arm64
         -S libsais
 
     - name: Build arm64
-      run: cmake --build ${{ steps.strings.outputs.build-output-dir }} --config Release
+      run: cmake --build build --config Release
 
     - name: Upload build artifacts
       uses: actions/upload-artifact@v3
@@ -127,7 +124,7 @@ jobs:
     
         
   publish-native-assets:
-    needs: build
+    needs: [build, build-windows]
     runs-on: ubuntu-latest
     steps:
     - name: Download build artifacts
