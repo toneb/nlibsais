@@ -119,7 +119,7 @@ jobs:
     - name: Upload build artifacts
       uses: actions/upload-artifact@v3
       with:
-        name: build-windows
+        name: build-linux
         path: |
           build-x64/libsais.so
           build-arm32/libsais.so
