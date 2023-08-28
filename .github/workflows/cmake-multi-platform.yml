@@ -67,7 +67,7 @@ jobs:
 
     - name: Configure x64
       run: >
-        cmake -B build
+        cmake -B build-x64
         -DCMAKE_C_COMPILER=clang
         -DLIBSAIS_BUILD_SHARED_LIB=ON
         -DCMAKE_C_FLAGS="-Ofast"
@@ -75,18 +75,17 @@ jobs:
         -S libsais
 
     - name: Build x64
-      run: cmake --build build --config Release
+      run: cmake --build build-x64 --config Release
 
     - name: Upload build artifacts
       uses: actions/upload-artifact@v3
       with:
-        name: build--${{ matrix.os }}-${{ matrix.architecture }}
-        path: |
-          build
+        name: build--win64
+        path: build/Release/libsais.dll
 
     - name: Configure x86
       run: >
-        cmake -B build
+        cmake -B build-x86
         -DCMAKE_C_COMPILER=clang
         -DLIBSAIS_BUILD_SHARED_LIB=ON
         -DCMAKE_C_FLAGS="-Ofast"
@@ -94,7 +93,7 @@ jobs:
         -S libsais
 
     - name: Build x86
-      run: cmake --build build --config Release
+      run: cmake --build build-x86 --config Release
 
     - name: Upload build artifacts
       uses: actions/upload-artifact@v3
@@ -105,7 +104,7 @@ jobs:
 
     - name: Configure arm64
       run: >
-        cmake -B build
+        cmake -B build-arm64
         -DCMAKE_C_COMPILER=clang
         -DLIBSAIS_BUILD_SHARED_LIB=ON
         -DCMAKE_C_FLAGS="-Ofast"
@@ -113,7 +112,7 @@ jobs:
         -S libsais
 
     - name: Build arm64
-      run: cmake --build build --config Release
+      run: cmake --build build-arm64 --config Release
 
     - name: Upload build artifacts
       uses: actions/upload-artifact@v3
