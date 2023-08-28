@@ -18,8 +18,6 @@ jobs:
         build_type: [Release]
         c_compiler: [clang]
         include:
-          - os: ubuntu-latest
-            c_compiler: clang
           - os: macos-latest
             c_compiler: clang
  
@@ -68,7 +66,7 @@ jobs:
     - name: Configure x64
       run: >
         cmake -B build-x64
-        -DCMAKE_C_COMPILER=clang
+        -DCMAKE_C_COMPILER=cl
         -DLIBSAIS_BUILD_SHARED_LIB=ON
         -DCMAKE_C_FLAGS="-Ofast"
         -A x64
@@ -80,7 +78,7 @@ jobs:
     - name: Configure x86
       run: >
         cmake -B build-x86
-        -DCMAKE_C_COMPILER=clang
+        -DCMAKE_C_COMPILER=cl
         -DLIBSAIS_BUILD_SHARED_LIB=ON
         -DCMAKE_C_FLAGS="-Ofast"
         -A Win32
@@ -92,7 +90,7 @@ jobs:
     - name: Configure arm64
       run: >
         cmake -B build-arm64
-        -DCMAKE_C_COMPILER=clang
+        -DCMAKE_C_COMPILER=cl
         -DLIBSAIS_BUILD_SHARED_LIB=ON
         -DCMAKE_C_FLAGS="-Ofast"
         -A arm64
@@ -135,10 +133,12 @@ jobs:
         -DCMAKE_C_COMPILER=clang
         -DLIBSAIS_BUILD_SHARED_LIB=ON
         -DCMAKE_C_FLAGS="-Ofast"
+        -DCMAKE_SYSTEM_PROCESSOR=arm
+        -DMAKE_C_COMPILER_TARGET=arm-linux-gnueabihf
         -S libsais
 
     - name: Build arm32
-      run: cmake --build build-arm32 --config Release -- -arch arm32
+      run: cmake --build build-arm32 --config Release
 
     - name: Configure arm64
       run: >
@@ -146,10 +146,12 @@ jobs:
         -DCMAKE_C_COMPILER=clang
         -DLIBSAIS_BUILD_SHARED_LIB=ON
         -DCMAKE_C_FLAGS="-Ofast"
+        -DCMAKE_SYSTEM_PROCESSOR=arm64
+        -DMAKE_C_COMPILER_TARGET=arm64-linux-gnueabihf
         -S libsais
 
     - name: Build arm64
-      run: cmake --build build-arm64 --config Release -- -arch arm32
+      run: cmake --build build-arm64 --config Release
 
     - name: Upload build artifacts
       uses: actions/upload-artifact@v3
