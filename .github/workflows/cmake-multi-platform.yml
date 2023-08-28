@@ -116,6 +116,9 @@ jobs:
       with:
         submodules: recursive
 
+    - name: Instance cross-compile toolchain
+      run: sudo apt-get install -y binutils-arm-linux-gnueabihf binutils-aarch64-linux-gnu
+
     - name: Configure x64
       run: >
         cmake -B build-x64
@@ -135,6 +138,7 @@ jobs:
         -DCMAKE_C_FLAGS="-Ofast"
         -DCMAKE_SYSTEM_PROCESSOR=arm
         -DCMAKE_C_COMPILER_TARGET=arm-linux-gnueabihf
+        -DCMAKE_C_COMPILER_EXTERNAL_TOOLCHAIN=/usr/aarch64-linux-gnu/bin
         -S libsais
 
     - name: Build arm32
@@ -148,6 +152,7 @@ jobs:
         -DCMAKE_C_FLAGS="-Ofast"
         -DCMAKE_SYSTEM_PROCESSOR=arm64
         -DCMAKE_C_COMPILER_TARGET=arm64-linux-gnueabihf
+        -DCMAKE_C_COMPILER_EXTERNAL_TOOLCHAIN=/usr/arm-linux-gnu/bin
         -S libsais
 
     - name: Build arm64
