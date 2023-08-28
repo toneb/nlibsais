@@ -139,12 +139,8 @@ jobs:
         -DCMAKE_SYSTEM_PROCESSOR=arm
         -DCMAKE_SYSTEM_NAME=Linux
         -DCMAKE_C_COMPILER_TARGET=arm-linux-gnueabihf
-        #-DCMAKE_FIND_ROOT_PATH=/usr/arm-linux-gnueabihf
-        #-DCMAKE_INCLUDE_PATH=/usr/include/arm-linux-gnueabihf
-        #-DCMAKE_LIBRARY_PATH=/usr/lib/arm-linux-gnueabihf
         -DCMAKE_PROGRAM_PATH=/usr/bin/arm-linux-gnueabihf
         -DCMAKE_FIND_ROOT_PATH_MODE_PROGRAM=NEVER
-        #-DCMAKE_FIND_ROOT_PATH_MODE_LIBRARY=ONLY
         -S libsais
 
     - name: Build arm32
