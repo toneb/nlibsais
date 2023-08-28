@@ -7,39 +7,21 @@ on:
     branches: [ "main" ]
 
 jobs:
-  build:
+  build-:
     runs-on: ${{ matrix.os }}
 
     strategy:
       fail-fast: true
 
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
-        architecture: [x86, x64, arm32, arm64]
+        os: [ubuntu-latest, macos-latest]
         build_type: [Release]
-        c_compiler: [clang, cl]
+        c_compiler: [clang]
         include:
-          - os: windows-latest
-            c_compiler: cl
           - os: ubuntu-latest
             c_compiler: clang
           - os: macos-latest
             c_compiler: clang
-        exclude:
-          - os: windows-latest
-            c_compiler: clang
-          - os: ubuntu-latest
-            c_compiler: cl
-          - os: macos-latest
-            c_compiler: cl
-          - os: windows-latest
-            architecture: arm32
-          - os: ubuntu-latest
-            architecture: x86
-          - os: macos-latest
-            architecture: x86
-          - os: macos-latest
-            architecture: arm32
  
     steps:
     - uses: actions/checkout@v3
@@ -54,8 +36,6 @@ jobs:
         echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
 
     - name: Configure CMake
-      # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
-      # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
       run: >
         cmake -B ${{ steps.strings.outputs.build-output-dir }}
         -DCMAKE_C_COMPILER=${{ matrix.c_compiler }}
@@ -76,7 +56,75 @@ jobs:
           ${{ steps.strings.outputs.build-output-dir }}/Release/libsais.dll
           ${{ steps.strings.outputs.build-output-dir }}/libsais.so
           ${{ steps.strings.outputs.build-output-dir }}/libsais.dylib
+        if-no-files-found: ignore
 
+  build-windows:
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        submodules: recursive
+
+    - name: Configure x64
+      run: >
+        cmake -B build
+        -DCMAKE_C_COMPILER=clang
+        -DCMAKE_BUILD_TYPE=Release
+        -DLIBSAIS_BUILD_SHARED_LIB=ON
+        -DCMAKE_C_FLAGS="-Ofast"
+        -A x64
+        -S libsais
+
+    - name: Build x64
+      run: cmake --build ${{ steps.strings.outputs.build-output-dir }} --config Release
+
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: build--${{ matrix.os }}-${{ matrix.architecture }}
+        path: |
+          build
+
+    - name: Configure x86
+      run: >
+        cmake -B build
+        -DCMAKE_C_COMPILER=clang
+        -DCMAKE_BUILD_TYPE=Release
+        -DLIBSAIS_BUILD_SHARED_LIB=ON
+        -DCMAKE_C_FLAGS="-Ofast"
+        -A Win32
+        -S libsais
+
+    - name: Build x86
+      run: cmake --build ${{ steps.strings.outputs.build-output-dir }} --config Release
+
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: build--${{ matrix.os }}-${{ matrix.architecture }}
+        path: |
+          build
+
+    - name: Configure arm64
+      run: >
+        cmake -B build
+        -DCMAKE_C_COMPILER=clang
+        -DCMAKE_BUILD_TYPE=Release
+        -DLIBSAIS_BUILD_SHARED_LIB=ON
+        -DCMAKE_C_FLAGS="-Ofast"
+        -A arm64
+        -S libsais
+
+    - name: Build arm64
+      run: cmake --build ${{ steps.strings.outputs.build-output-dir }} --config Release
+
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: build--${{ matrix.os }}-${{ matrix.architecture }}
+        path: |
+          build
+    
         
   publish-native-assets:
     needs: build
