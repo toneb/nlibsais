@@ -76,7 +76,6 @@ jobs:
         -DCMAKE_C_COMPILER=clang
         -DLIBSAIS_BUILD_SHARED_LIB=ON
         -DCMAKE_C_FLAGS="-Ofast"
-        -DCMAKE=libsais
         -DCMAKE_SHARED_LIBRARY_PREFIX_C=""
         -S libsais
 
@@ -100,24 +99,18 @@ jobs:
     - name: Build arm32
       run: cmake --build build-arm32 --config Release
 
-    - name: Upload build artifacts - test
-      uses: actions/upload-artifact@v3
-      with:
-        name: build-windows
-        path: |
-          build-x64/libsais.so
-          build-arm32/libsais.so
-
     - name: Configure arm64
       run: >
         cmake -B build-arm64
         -DCMAKE_C_COMPILER=clang
         -DLIBSAIS_BUILD_SHARED_LIB=ON
         -DCMAKE_C_FLAGS="-Ofast"
-        -DCMAKE_SYSTEM_PROCESSOR=arm64
-        -DCMAKE_C_COMPILER_TARGET=arm64-linux-gnueabihf
-        -DCMAKE_C_COMPILER_EXTERNAL_TOOLCHAIN=/usr/aarch64-linux-gnu/bin
-        -DOUTPUT_NAME=libsais
+        -DCMAKE_SYSTEM_PROCESSOR=aarch64
+        -DCMAKE_SYSTEM_NAME=Linux
+        -DCMAKE_C_COMPILER_TARGET=aarch64-linux-gnu
+        -DCMAKE_PROGRAM_PATH=/usr/bin/aarch64-linux-gnu
+        -DCMAKE_FIND_ROOT_PATH_MODE_PROGRAM=NEVER
+        -DCMAKE_SHARED_LIBRARY_PREFIX_C=""
         -S libsais
 
     - name: Build arm64
