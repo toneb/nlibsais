@@ -125,6 +125,7 @@ jobs:
         -DCMAKE_C_COMPILER=clang
         -DLIBSAIS_BUILD_SHARED_LIB=ON
         -DCMAKE_C_FLAGS="-Ofast"
+        -DCMAKE_SHARED_LIBRARY_PREFIX=""
         -S libsais
 
     - name: Build x64
@@ -141,7 +142,7 @@ jobs:
         -DCMAKE_C_COMPILER_TARGET=arm-linux-gnueabihf
         -DCMAKE_PROGRAM_PATH=/usr/bin/arm-linux-gnueabihf
         -DCMAKE_FIND_ROOT_PATH_MODE_PROGRAM=NEVER
-        -DCMAKE_SHARED_MODULE_PREFIX=""
+        -DCMAKE_SHARED_LIBRARY_PREFIX=""
         -S libsais
 
     - name: Build arm32
@@ -164,6 +165,7 @@ jobs:
         -DCMAKE_SYSTEM_PROCESSOR=arm64
         -DCMAKE_C_COMPILER_TARGET=arm64-linux-gnueabihf
         -DCMAKE_C_COMPILER_EXTERNAL_TOOLCHAIN=/usr/aarch64-linux-gnu/bin
+        -DCMAKE_SHARED_LIBRARY_PREFIX=""
         -S libsais
 
     - name: Build arm64
