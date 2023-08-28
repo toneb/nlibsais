@@ -76,13 +76,7 @@ jobs:
 
     - name: Build x64
       run: cmake --build build-x64 --config Release
-
-    - name: Upload build artifacts
-      uses: actions/upload-artifact@v3
-      with:
-        name: build--win64
-        path: build/Release/libsais.dll
-
+      
     - name: Configure x86
       run: >
         cmake -B build-x86
@@ -94,13 +88,6 @@ jobs:
 
     - name: Build x86
       run: cmake --build build-x86 --config Release
-
-    - name: Upload build artifacts
-      uses: actions/upload-artifact@v3
-      with:
-        name: build--${{ matrix.os }}-${{ matrix.architecture }}
-        path: |
-          build
 
     - name: Configure arm64
       run: >
@@ -117,9 +104,11 @@ jobs:
     - name: Upload build artifacts
       uses: actions/upload-artifact@v3
       with:
-        name: build--${{ matrix.os }}-${{ matrix.architecture }}
+        name: build-arm64
         path: |
-          build
+          build-x64/Release/libsais.dll
+          build-x86/Release/libsais.dll
+          build-arm64/Release/libsais.dll
     
         
   publish-native-assets:
