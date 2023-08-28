@@ -1,4 +1,4 @@
-name: CMake on multiple platforms
+name: Build native assets
 
 on:
   push:
@@ -124,7 +124,6 @@ jobs:
         -DCMAKE_C_COMPILER=clang
         -DLIBSAIS_BUILD_SHARED_LIB=ON
         -DCMAKE_C_FLAGS="-Ofast"
-        -A x64
         -S libsais
 
     - name: Build x64
@@ -136,7 +135,7 @@ jobs:
         -DCMAKE_C_COMPILER=clang
         -DLIBSAIS_BUILD_SHARED_LIB=ON
         -DCMAKE_C_FLAGS="-Ofast"
-        -A arm32
+        -DTOOLCHAIN_CROSS_TRIPLET="arm-linux-gnueabihf"
         -S libsais
 
     - name: Build arm32
@@ -148,7 +147,7 @@ jobs:
         -DCMAKE_C_COMPILER=clang
         -DLIBSAIS_BUILD_SHARED_LIB=ON
         -DCMAKE_C_FLAGS="-Ofast"
-        -A arm64
+        -DTOOLCHAIN_CROSS_TRIPLET="aarch64-linux-gnu"
         -S libsais
 
     - name: Build arm64
