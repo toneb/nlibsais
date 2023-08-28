@@ -15,7 +15,7 @@ jobs:
 
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-        architecture: [x86, x68, arm32, arm64]
+        architecture: [x86, x64, arm32, arm64]
         build_type: [Release]
         c_compiler: [clang, cl]
         include:
@@ -72,8 +72,12 @@ jobs:
       uses: actions/upload-artifact@v3
       with:
         name: build--${{ matrix.os }}-${{ matrix.architecture }}
-        path: ${{ steps.strings.outputs.build-output-dir }}
+        path: |
+          ${{ steps.strings.outputs.build-output-dir }}/Release/libsais.dll
+          ${{ steps.strings.outputs.build-output-dir }}/libsais.so
+          ${{ steps.strings.outputs.build-output-dir }}/libsais.dylib
 
+        
   publish-native-assets:
     needs: build
     runs-on: ubuntu-latest
