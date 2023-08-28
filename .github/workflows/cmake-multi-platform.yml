@@ -116,8 +116,8 @@ jobs:
       with:
         submodules: recursive
 
-    - name: Instance cross-compile toolchain
-      run: sudo apt-get install -y binutils-arm-linux-gnueabihf binutils-aarch64-linux-gnu
+    - name: Install cross-compile toolchain
+      run: sudo apt-get install -y binutils-arm-linux-gnueabihf binutils-aarch64-linux-gnu gcc-arm-linux-gnueabihf gcc-aarch64-linux-gnu
 
     - name: Configure x64
       run: >
@@ -137,8 +137,14 @@ jobs:
         -DLIBSAIS_BUILD_SHARED_LIB=ON
         -DCMAKE_C_FLAGS="-Ofast"
         -DCMAKE_SYSTEM_PROCESSOR=arm
+        -DCMAKE_CROSSCOMPILING=TRUE
         -DCMAKE_C_COMPILER_TARGET=arm-linux-gnueabihf
-        -DCMAKE_C_COMPILER_EXTERNAL_TOOLCHAIN=/usr/aarch64-linux-gnu/bin
+        -DCMAKE_FIND_ROOT_PATH=/usr/arm-linux-gnueabihf
+        -DCMAKE_INCLUDE_PATH=/usr/include/arm-linux-gnueabihf
+        -DCMAKE_LIBRARY_PATH=/usr/lib/arm-linux-gnueabihf
+        -DMAKE_PROGRAM_PATH=/usr/bin/arm-linux-gnueabihf
+        -DCMAKE_FIND_ROOT_PATH_MODE_PROGRAM=NEVER
+        -DCMAKE_FIND_ROOT_PATH_MODE_LIBRARY=ONLY
         -S libsais
 
     - name: Build arm32
@@ -152,7 +158,7 @@ jobs:
         -DCMAKE_C_FLAGS="-Ofast"
         -DCMAKE_SYSTEM_PROCESSOR=arm64
         -DCMAKE_C_COMPILER_TARGET=arm64-linux-gnueabihf
-        -DCMAKE_C_COMPILER_EXTERNAL_TOOLCHAIN=/usr/arm-linux-gnu/bin
+        -DCMAKE_C_COMPILER_EXTERNAL_TOOLCHAIN=/usr/aarch64-linux-gnu/bin
         -S libsais
 
     - name: Build arm64
