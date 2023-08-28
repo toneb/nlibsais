@@ -137,7 +137,7 @@ jobs:
         -DLIBSAIS_BUILD_SHARED_LIB=ON
         -DCMAKE_C_FLAGS="-Ofast"
         -DCMAKE_SYSTEM_PROCESSOR=arm
-        -DCMAKE_CROSSCOMPILING=TRUE
+        -DCMAKE_SYSTEM_NAME=Linux
         -DCMAKE_C_COMPILER_TARGET=arm-linux-gnueabihf
         -DCMAKE_FIND_ROOT_PATH=/usr/arm-linux-gnueabihf
         -DCMAKE_INCLUDE_PATH=/usr/include/arm-linux-gnueabihf
