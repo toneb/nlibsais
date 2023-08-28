@@ -135,11 +135,10 @@ jobs:
         -DCMAKE_C_COMPILER=clang
         -DLIBSAIS_BUILD_SHARED_LIB=ON
         -DCMAKE_C_FLAGS="-Ofast"
-        -DTOOLCHAIN_CROSS_TRIPLET="arm-linux-gnueabihf"
         -S libsais
 
     - name: Build arm32
-      run: cmake --build build-arm32 --config Release
+      run: cmake --build build-arm32 --config Release -- -arch arm32
 
     - name: Configure arm64
       run: >
@@ -147,11 +146,10 @@ jobs:
         -DCMAKE_C_COMPILER=clang
         -DLIBSAIS_BUILD_SHARED_LIB=ON
         -DCMAKE_C_FLAGS="-Ofast"
-        -DTOOLCHAIN_CROSS_TRIPLET="aarch64-linux-gnu"
         -S libsais
 
     - name: Build arm64
-      run: cmake --build build-arm64 --config Release
+      run: cmake --build build-arm64 --config Release -- -arch arm32
 
     - name: Upload build artifacts
       uses: actions/upload-artifact@v3
