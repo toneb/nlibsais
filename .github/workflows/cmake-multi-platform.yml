@@ -178,7 +178,7 @@ jobs:
         path: build
         
     - name: Build native nuget package
-      run: dotnet pack -c Release src/NLibSais.NativeAssets.csproj
+      run: dotnet pack -c Release src/NLibSais.NativeAssets/NLibSais.NativeAssets.csproj
       
     - name: Upload nuget
       uses: actions/upload-artifact@v3
