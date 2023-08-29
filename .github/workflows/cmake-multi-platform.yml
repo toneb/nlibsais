@@ -139,6 +139,7 @@ jobs:
         -DCMAKE_C_COMPILER=clang
         -DLIBSAIS_BUILD_SHARED_LIB=ON
         -DCMAKE_C_FLAGS="-Ofast"
+        -DCMAKE_SHARED_LIBRARY_PREFIX_C=""
         -DCMAKE_SYSTEM_PROCESSOR=x86_64
         -S libsais
 
@@ -151,6 +152,7 @@ jobs:
         -DCMAKE_C_COMPILER=clang
         -DLIBSAIS_BUILD_SHARED_LIB=ON
         -DCMAKE_C_FLAGS="-Ofast"
+        -DCMAKE_SHARED_LIBRARY_PREFIX_C=""
         -DCMAKE_SYSTEM_PROCESSOR=arm64
         -S libsais
 
@@ -162,8 +164,8 @@ jobs:
       with:
         name: build-linux
         path: |
-          build-x64/libsais.so
-          build-arm64/libsais.so
+          build-x64/libsais.dylib
+          build-arm64/libsais.dylib
           
     
   publish-native-assets:
