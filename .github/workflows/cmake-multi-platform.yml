@@ -181,10 +181,6 @@ jobs:
       with:
         path: build
 
-    - uses: actions/checkout@v3
-      with:
-        submodules: recursive
-        
     - name: Build native nuget package
       run: dotnet pack -c Release src/NLibSais.NativeAssets/NLibSais.NativeAssets.csproj
       
