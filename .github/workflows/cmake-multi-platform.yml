@@ -139,7 +139,7 @@ jobs:
         -DCMAKE_C_COMPILER=clang
         -DLIBSAIS_BUILD_SHARED_LIB=ON
         -DCMAKE_C_FLAGS="-Ofast"
-        -A x64
+        -DCMAKE_SYSTEM_PROCESSOR=x86_64
         -S libsais
 
     - name: Build x64
@@ -151,7 +151,7 @@ jobs:
         -DCMAKE_C_COMPILER=clang
         -DLIBSAIS_BUILD_SHARED_LIB=ON
         -DCMAKE_C_FLAGS="-Ofast"
-        -A amd64
+        -DCMAKE_SYSTEM_PROCESSOR=arm64
         -S libsais
 
     - name: Build arm64
