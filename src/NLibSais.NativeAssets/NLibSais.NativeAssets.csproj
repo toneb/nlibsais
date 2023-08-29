@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-      <TargetFramework>netstandard2.0</TargetFramework>
+      <TargetFrameworks>netstandard2.0;net47</TargetFrameworks>
       <PackageVersion>1.0.0-experimental1</PackageVersion>
       <Authors>@toneb</Authors>
       <Description>.NET cross-platform bindings for libsais - a library for linear time suffix array, longest common prefix array and burrows wheeler transform construction based on induced sorting algorithm. </Description>
@@ -15,6 +15,9 @@
 
     <ItemGroup>
       <None Include="../../README.md" Pack="true" PackagePath="/" />
+
+      <None Include="NLibSais.NativeAssets.targets" Pack="true" PackagePath="/build/net47" />
+      <None Include="NLibSais.NativeAssets.targets" Pack="true" PackagePath="/buildTransitive/net47" />
         
       <None Include="../../build/native-windows/build-x64/Release/libsais.dll" Pack="true" PackagePath="/runtimes/win-x64/native" />
       <None Include="../../build/native-windows/build-x86/Release/libsais.dll" Pack="true" PackagePath="/runtimes/win-x86/native" />
@@ -25,5 +28,6 @@
       <None Include="../../build/native-macos/build-x64/libsais.dylib" Pack="true" PackagePath="/runtimes/osx-x64/native" />
       <None Include="../../build/native-macos/build-arm64/libsais.dylib" Pack="true" PackagePath="/runtimes/osx-arm64/native" />
     </ItemGroup>
+
 
 </Project>
