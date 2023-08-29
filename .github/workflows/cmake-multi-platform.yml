@@ -124,11 +124,50 @@ jobs:
           build-x64/libsais.so
           build-arm32/libsais.so
           build-arm64/libsais.so
+
+
+  build-macos:
+    runs-on: macos-latest
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        submodules: recursive
+
+    - name: Configure x64
+      run: >
+        cmake -B build-x64
+        -DCMAKE_C_COMPILER=clang
+        -DLIBSAIS_BUILD_SHARED_LIB=ON
+        -DCMAKE_C_FLAGS="-Ofast"
+        -A x64
+        -S libsais
+
+    - name: Build x64
+      run: cmake --build build-x64 --config Release
+    
+    - name: Configure arm64
+      run: >
+        cmake -B build-arm64
+        -DCMAKE_C_COMPILER=clang
+        -DLIBSAIS_BUILD_SHARED_LIB=ON
+        -DCMAKE_C_FLAGS="-Ofast"
+        -A amd64
+        -S libsais
+
+    - name: Build arm64
+      run: cmake --build build-arm64 --config Release
+
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: build-linux
+        path: |
+          build-x64/libsais.so
+          build-arm64/libsais.so
           
     
-        
   publish-native-assets:
-    needs: [build-windows, build-linux]
+    needs: [build-windows, build-linux, build-macos]
     runs-on: ubuntu-latest
     steps:
     - name: Download build artifacts
