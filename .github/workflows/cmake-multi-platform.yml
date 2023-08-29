@@ -172,15 +172,15 @@ jobs:
     needs: [native-build-windows, native-build-linux, native-build-macos]
     runs-on: windows-latest
     steps:
+    - uses: actions/checkout@v3
+      with:
+        submodules: recursive
+        
     - name: Download build artifacts
       uses: actions/download-artifact@v3
       with:
         path: build
-        
-    - name: Display structure of downloaded files
-      run: ls -R
-      working-directory: build
-        
+
     - uses: actions/checkout@v3
       with:
         submodules: recursive
