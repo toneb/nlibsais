@@ -1,0 +1,22 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NLibSais", "src\NLibSais\NLibSais.csproj", "{80FAE34F-CA90-4897-B576-2DAE8312AEDE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NLibSais.NativeAssets", "src\NLibSais.NativeAssets\NLibSais.NativeAssets.csproj", "{371CF580-7755-456A-A4D2-94B21F274F3B}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{80FAE34F-CA90-4897-B576-2DAE8312AEDE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{80FAE34F-CA90-4897-B576-2DAE8312AEDE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{80FAE34F-CA90-4897-B576-2DAE8312AEDE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{80FAE34F-CA90-4897-B576-2DAE8312AEDE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{371CF580-7755-456A-A4D2-94B21F274F3B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{371CF580-7755-456A-A4D2-94B21F274F3B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{371CF580-7755-456A-A4D2-94B21F274F3B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{371CF580-7755-456A-A4D2-94B21F274F3B}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
