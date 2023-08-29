@@ -1,4 +1,4 @@
-name: Build native assets
+name: Build lib
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
     branches: [ "main" ]
 
 jobs:
-  build-windows:
+  native-build-windows:
     runs-on: windows-latest
     steps:
     - uses: actions/checkout@v3
@@ -53,14 +53,14 @@ jobs:
     - name: Upload build artifacts
       uses: actions/upload-artifact@v3
       with:
-        name: build-windows
+        name: native-windows
         path: |
           build-x64/Release/libsais.dll
           build-x86/Release/libsais.dll
           build-arm64/Release/libsais.dll
 
 
-  build-linux:
+  native-build-linux:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
@@ -119,14 +119,14 @@ jobs:
     - name: Upload build artifacts
       uses: actions/upload-artifact@v3
       with:
-        name: build-linux
+        name: native-linux
         path: |
           build-x64/libsais.so
           build-arm32/libsais.so
           build-arm64/libsais.so
 
 
-  build-macos:
+  native-build-macos:
     runs-on: macos-latest
     steps:
     - uses: actions/checkout@v3
@@ -162,17 +162,27 @@ jobs:
     - name: Upload build artifacts
       uses: actions/upload-artifact@v3
       with:
-        name: build-linux
+        name: native-macos
         path: |
           build-x64/libsais.dylib
           build-arm64/libsais.dylib
           
     
-  publish-native-assets:
-    needs: [build-windows, build-linux, build-macos]
+  build-nugets:
+    needs: [native-build-windows, native-build-linux, native-build-macos]
     runs-on: ubuntu-latest
     steps:
     - name: Download build artifacts
       uses: actions/download-artifact@v3
       with:
-        path: build-artifacts
+        path: build
+        
+    - name: Build native nuget package
+      run: dotnet pack -c Release src/NLibSais.NativeAssets.csproj
+      
+    - name: Upload nuget
+      uses: actions/upload-artifact@v3
+      with:
+        name: native-nuget
+        path: src/NLibSais.NativeAssets/bin/Release/*.nupkg
+

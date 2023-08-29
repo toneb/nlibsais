@@ -1,0 +1,29 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+      <TargetFramework>netstandard2.0</TargetFramework>
+      <PackageVersion>1.0.0-experimental1</PackageVersion>
+      <Authors>@toneb</Authors>
+      <Description>.NET cross-platform bindings for libsais - a library for linear time suffix array, longest common prefix array and burrows wheeler transform construction based on induced sorting algorithm. </Description>
+      <PackageProjectUrl>https://github.com/toneb/nlibsais</PackageProjectUrl>
+      <RepositoryUrl>https://github.com/toneb/nlibsais.git</RepositoryUrl>
+      <RepositoryType>git</RepositoryType>
+      <PackageTags>native libsais suffix-array bwt</PackageTags>
+      <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+      <PackageReadmeFile>README.md</PackageReadmeFile>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <None Include="../../README.md" Pack="true" PackagePath="/" />
+        
+      <None Include="../../build/native-windows/build-x64/Release/libsais.dll" Pack="true" PackagePath="/runtimes/win-x64/native" />
+      <None Include="../../build/native-windows/build-x86/Release/libsais.dll" Pack="true" PackagePath="/runtimes/win-x86/native" />
+      <None Include="../../build/native-windows/build-arm64/Release/libsais.dll" Pack="true" PackagePath="/runtimes/win-arm64/native" />
+      <None Include="../../build/native-linux/build-x64/libsais.so" Pack="true" PackagePath="/runtimes/linux-x64/native" />
+      <None Include="../../build/native-linux/build-arm32/libsais.so" Pack="true" PackagePath="/runtimes/linux-arm/native" />
+      <None Include="../../build/native-linux/build-arm64/libsais.so" Pack="true" PackagePath="/runtimes/linux-arm64/native" />
+      <None Include="../../build/native-macos/build-x64/libsais.dylib" Pack="true" PackagePath="/runtimes/osx-x64/native" />
+      <None Include="../../build/native-macos/build-arm64/libsais.dylib" Pack="true" PackagePath="/runtimes/osx-arm64/native" />
+    </ItemGroup>
+
+</Project>
