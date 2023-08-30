@@ -10,6 +10,7 @@
     
     <ItemGroup>
         <PackageReference Include="NLibSais.NativeAssets" Version="1.0.0-experimental1" />
+        <PackageReference Include="System.Memory" Version="4.5.5" Condition="'$(TargetFramework)' == 'netstandard2.0'" />
     </ItemGroup>
 
 </Project>

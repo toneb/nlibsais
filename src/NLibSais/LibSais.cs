@@ -1,12 +1,11 @@
-﻿using System.Runtime.InteropServices;
+﻿using System.Buffers;
+using System.Runtime.InteropServices;
 
 namespace NLibSais;
 
-// TODO: validate that all SA methods return the same index as BWT
-// TODO: validate that temporary array for BWT is actually SA at the end
-// TODO: what are auxiliary indexes?
-// TODO: validate return index of SA methods
-// TODO: what does reconstruct BWT return?
+// TODO: auxiliary indexes methods?
+// TODO: omp methods
+// TODO: 64-bit methods
 
 /// <summary>
 /// libsais is a library for linear time suffix array, longest common prefix array and burrows wheeler transform construction based on induced sorting algorithm.
@@ -22,7 +21,7 @@ public static class LibSais
     /// <returns>The primary index.</returns>
     /// <exception cref="ArgumentException">Thrown when outputSuffixArray is shorter than inputString.</exception>
     /// <exception cref="InvalidOperationException">Thrown when unexpected error occurs.</exception>
-    public static unsafe int ConstructSuffixArray(ReadOnlySpan<byte> inputString, Span<int> outputSuffixArray,
+    public static unsafe void ConstructSuffixArray(ReadOnlySpan<byte> inputString, Span<int> outputSuffixArray,
         Span<int> outputFrequencyTable = default)
     {
         if (outputSuffixArray.Length < inputString.Length)
@@ -38,10 +37,8 @@ public static class LibSais
                 outputSuffixArray.Length - inputString.Length, outputFrequencyTablePtr);
         }
 
-        if (result < 0)
+        if (result != 0)
             throw new InvalidOperationException("Error occured while constructing suffix array.");
-
-        return result;
     }
     
     /// <summary>
@@ -53,7 +50,7 @@ public static class LibSais
     /// <returns>The primary index.</returns>
     /// <exception cref="ArgumentException">Thrown when outputSuffixArray is shorter than inputString.</exception>
     /// <exception cref="InvalidOperationException">Thrown when unexpected error occurs.</exception>
-    public static unsafe int ConstructSuffixArray(ReadOnlySpan<ushort> inputString, Span<int> outputSuffixArray,
+    public static unsafe void ConstructSuffixArray(ReadOnlySpan<ushort> inputString, Span<int> outputSuffixArray,
         Span<int> outputFrequencyTable = default)
     {
         if (outputSuffixArray.Length < inputString.Length)
@@ -69,10 +66,8 @@ public static class LibSais
                 outputSuffixArray.Length - inputString.Length, outputFrequencyTablePtr);
         }
 
-        if (result < 0)
+        if (result != 0)
             throw new InvalidOperationException("Error occured while constructing suffix array.");
-
-        return result;
     }
 
     /// <summary>
@@ -84,7 +79,7 @@ public static class LibSais
     /// <returns>The primary index.</returns>
     /// <exception cref="ArgumentException">Thrown when outputSuffixArray is shorter than inputString.</exception>
     /// <exception cref="InvalidOperationException">Thrown when unexpected error occurs.</exception>
-    public static int ConstructSuffixArray(ReadOnlySpan<char> inputString, Span<int> outputSuffixArray,
+    public static void ConstructSuffixArray(ReadOnlySpan<char> inputString, Span<int> outputSuffixArray,
         Span<int> outputFrequencyTable = default)
         => ConstructSuffixArray(MemoryMarshal.Cast<char, ushort>(inputString), outputSuffixArray,
             outputFrequencyTable);
@@ -99,7 +94,7 @@ public static class LibSais
     /// <returns>The primary index.</returns>
     /// <exception cref="ArgumentException">Thrown when outputSuffixArray is shorter than inputArray.</exception>
     /// <exception cref="InvalidOperationException">Thrown when unexpected error occurs.</exception>
-    public static unsafe int ConstructSuffixArray(Span<int> inputArray, Span<int> outputSuffixArray,
+    public static unsafe void ConstructSuffixArray(Span<int> inputArray, Span<int> outputSuffixArray,
         int alphabetSize)
     {
         if (outputSuffixArray.Length < inputArray.Length)
@@ -114,10 +109,8 @@ public static class LibSais
                 alphabetSize, outputSuffixArray.Length - inputArray.Length);
         }
 
-        if (result < 0)
+        if (result != 0)
             throw new InvalidOperationException("Error occured while constructing suffix array.");
-
-        return result;
     }
 
     /// <summary>
@@ -125,29 +118,35 @@ public static class LibSais
     /// </summary>
     /// <param name="inputString">[0..n-1] The input string.</param>
     /// <param name="outputString">[0..n-1] The output string (can be the same as inputString).</param>
-    /// <param name="temporaryArray">[0..n-1+fs] The temporary array. Can optionally include extra space at the end which might be used to improve performance.</param>
     /// <param name="outputFrequencyTable">0..255] The output symbol frequency table (can be empty/default).</param>
     /// <returns>The primary index.</returns>
-    /// <exception cref="ArgumentException">Thrown when inputString and outputString lengths do not match, or when temporaryArray is shorter than inputString.</exception>
+    /// <remarks>Temporary array is rented from shared array pool.</remarks>
+    /// <exception cref="ArgumentException">Thrown when inputString and outputString lengths do not match.</exception>
     /// <exception cref="InvalidOperationException">Thrown when unexpected error occurs.</exception>
     public static unsafe int ConstructBWT(ReadOnlySpan<byte> inputString, Span<byte> outputString,
-        Span<int> temporaryArray, Span<int> outputFrequencyTable = default)
+        Span<int> outputFrequencyTable = default)
     {
         if (outputString.Length != inputString.Length)
             throw new ArgumentException("Input string and output string must be of the same length.");
-        
-        if (temporaryArray.Length < inputString.Length)
-            throw new ArgumentException("Temporary array is shorter than input array.");
 
         int result;
-        
-        fixed (byte* inputStringPtr = inputString)
-        fixed (byte* outputStringPtr = outputString)
-        fixed (int* temporaryArrayPtr = temporaryArray)
-        fixed (int* outputFrequencyTablePtr = outputFrequencyTable)
+        var temporaryArray = ArrayPool<byte>.Shared.Rent(inputString.Length * sizeof(int));
+        var temporaryArrayInt = MemoryMarshal.Cast<byte, int>(temporaryArray);
+
+        try
         {
-            result = NativeMethods.libsais_bwt(inputStringPtr, outputStringPtr, temporaryArrayPtr,
-                inputString.Length, temporaryArray.Length - inputString.Length, outputFrequencyTablePtr);
+            fixed (byte* inputStringPtr = inputString)
+            fixed (byte* outputStringPtr = outputString)
+            fixed (int* temporaryArrayPtr = temporaryArrayInt)
+            fixed (int* outputFrequencyTablePtr = outputFrequencyTable)
+            {
+                result = NativeMethods.libsais_bwt(inputStringPtr, outputStringPtr, temporaryArrayPtr,
+                    inputString.Length, temporaryArrayInt.Length - inputString.Length, outputFrequencyTablePtr);
+            }
+        }
+        finally
+        {
+            ArrayPool<byte>.Shared.Return(temporaryArray);
         }
 
         if (result < 0)
@@ -161,29 +160,34 @@ public static class LibSais
     /// </summary>
     /// <param name="inputString">[0..n-1] The input 16-bit string.</param>
     /// <param name="outputString">[0..n-1] The output 16-bit string (can be the same as inputString).</param>
-    /// <param name="temporaryArray">[0..n-1+fs] The temporary array. Can optionally include extra space at the end which might be used to improve performance.</param>
     /// <param name="outputFrequencyTable">[0..255] The output symbol frequency table (can be empty/default).</param>
     /// <returns>The primary index.</returns>
-    /// <exception cref="ArgumentException">Thrown when inputString and outputString lengths do not match, or when temporaryArray is shorter than inputString.</exception>
+    /// <exception cref="ArgumentException">Thrown when inputString and outputString lengths do not match.</exception>
     /// <exception cref="InvalidOperationException">Thrown when unexpected error occurs.</exception>
     public static unsafe int ConstructBWT(ReadOnlySpan<ushort> inputString, Span<ushort> outputString,
-        Span<int> temporaryArray, Span<int> outputFrequencyTable = default)
+        Span<int> outputFrequencyTable = default)
     {
         if (outputString.Length != inputString.Length)
             throw new ArgumentException("Input string and output string must be of the same length.");
-        
-        if (temporaryArray.Length < inputString.Length)
-            throw new ArgumentException("Temporary array is shorter than input array.");
 
         int result;
-        
-        fixed (ushort* inputStringPtr = inputString)
-        fixed (ushort* outputStringPtr = outputString)
-        fixed (int* temporaryArrayPtr = temporaryArray)
-        fixed (int* outputFrequencyTablePtr = outputFrequencyTable)
+        var temporaryArray = ArrayPool<byte>.Shared.Rent(inputString.Length * sizeof(int));
+        var temporaryArrayInt = MemoryMarshal.Cast<byte, int>(temporaryArray);
+
+        try
         {
-            result = NativeMethods.libsais16_bwt(inputStringPtr, outputStringPtr, temporaryArrayPtr,
-                inputString.Length, temporaryArray.Length - inputString.Length, outputFrequencyTablePtr);
+            fixed (ushort* inputStringPtr = inputString)
+            fixed (ushort* outputStringPtr = outputString)
+            fixed (int* temporaryArrayPtr = temporaryArrayInt)
+            fixed (int* outputFrequencyTablePtr = outputFrequencyTable)
+            {
+                result = NativeMethods.libsais16_bwt(inputStringPtr, outputStringPtr, temporaryArrayPtr,
+                    inputString.Length, temporaryArrayInt.Length - inputString.Length, outputFrequencyTablePtr);
+            }
+        }
+        finally
+        {
+            ArrayPool<byte>.Shared.Return(temporaryArray);
         }
 
         if (result < 0)
@@ -197,44 +201,47 @@ public static class LibSais
     /// </summary>
     /// <param name="inputString">[0..n-1] The input 16-bit string.</param>
     /// <param name="outputString">[0..n-1] The output 16-bit string (can be the same as inputString).</param>
-    /// <param name="temporaryArray">[0..n-1+fs] The temporary array. Can optionally include extra space at the end which might be used to improve performance.</param>
     /// <param name="outputFrequencyTable">[0..255] The output symbol frequency table (can be empty/default).</param>
     /// <returns>The primary index.</returns>
-    /// <exception cref="ArgumentException">Thrown when inputString and outputString lengths do not match, or when temporaryArray is shorter than inputString.</exception>
+    /// <exception cref="ArgumentException">Thrown when inputString and outputString lengths do not match.</exception>
     /// <exception cref="InvalidOperationException">Thrown when unexpected error occurs.</exception>
-    public static unsafe int ConstructBWT(ReadOnlySpan<char> inputString, Span<char> outputString,
-        Span<int> temporaryArray, Span<int> outputFrequencyTable = default)
+    public static int ConstructBWT(ReadOnlySpan<char> inputString, Span<char> outputString,
+        Span<int> outputFrequencyTable = default)
         => ConstructBWT(MemoryMarshal.Cast<char, ushort>(inputString), 
-            MemoryMarshal.Cast<char, ushort>(outputString), temporaryArray, outputFrequencyTable);
+            MemoryMarshal.Cast<char, ushort>(outputString), outputFrequencyTable);
 
     /// <summary>
     /// Constructs the original string from a given burrows-wheeler transformed string (BWT) with primary index.
     /// </summary>
     /// <param name="inputString">[0..n-1] The input string.</param>
     /// <param name="outputString">[0..n-1] The output string (can be inputString).</param>
-    /// <param name="temporaryArray">[0..n] The temporary array (NOTE, temporary array must be n + 1 size).</param>
     /// <param name="primaryIndex">The primary index.</param>
     /// <param name="inputFrequencyTable">[0..255] The input symbol frequency table (can be empty/default).</param>
-    /// <exception cref="ArgumentException">Thrown when inputString and outputString lengths do not match, or when temporaryArray is shorter than inputString+1.</exception>
+    /// <exception cref="ArgumentException">Thrown when inputString and outputString lengths do not match.</exception>
     /// <exception cref="InvalidOperationException">Thrown when unexpected error occurs.</exception>
     public static unsafe void ReconstructOriginalFromBWT(ReadOnlySpan<byte> inputString, Span<byte> outputString,
-        Span<int> temporaryArray, int primaryIndex, Span<int> inputFrequencyTable = default)
+        int primaryIndex, Span<int> inputFrequencyTable = default)
     {
         if (outputString.Length != inputString.Length)
             throw new ArgumentException("Input string and output string must be of the same length.");
-        
-        if (temporaryArray.Length < inputString.Length + 1)
-            throw new ArgumentException("Temporary array is shorter than input array.");
 
         int result;
-        
-        fixed (byte* inputStringPtr = inputString)
-        fixed (byte* outputStringPtr = outputString)
-        fixed (int* temporaryArrayPtr = temporaryArray)
-        fixed (int* inputFrequencyTablePtr = inputFrequencyTable)
+        var temporaryArray = ArrayPool<byte>.Shared.Rent((inputString.Length + 1) * sizeof(int));
+
+        try
         {
-            result = NativeMethods.libsais_unbwt(inputStringPtr, outputStringPtr, temporaryArrayPtr,
-                inputString.Length, inputFrequencyTablePtr, primaryIndex);
+            fixed (byte* inputStringPtr = inputString)
+            fixed (byte* outputStringPtr = outputString)
+            fixed (int* temporaryArrayPtr = MemoryMarshal.Cast<byte, int>(temporaryArray))
+            fixed (int* inputFrequencyTablePtr = inputFrequencyTable)
+            {
+                result = NativeMethods.libsais_unbwt(inputStringPtr, outputStringPtr, temporaryArrayPtr,
+                    inputString.Length, inputFrequencyTablePtr, primaryIndex);
+            }
+        }
+        finally
+        {
+            ArrayPool<byte>.Shared.Return(temporaryArray);
         }
 
         if (result != 0)
@@ -246,29 +253,33 @@ public static class LibSais
     /// </summary>
     /// <param name="inputString">[0..n-1] The input 16-bit string.</param>
     /// <param name="outputString">[0..n-1] The output 16-bit string (can be T).</param>
-    /// <param name="temporaryArray">[0..n] The temporary array (NOTE, temporary array must be n + 1 size).</param>
     /// <param name="primaryIndex">The primary index.</param>
     /// <param name="inputFrequencyTable">[0..65535] The input 16-bit symbol frequency table (can be empty/default).</param>
-    /// <exception cref="ArgumentException">Thrown when inputString and outputString lengths do not match, or when temporaryArray is shorter than inputString+1.</exception>
+    /// <exception cref="ArgumentException">Thrown when inputString and outputString lengths do not match.</exception>
     /// <exception cref="InvalidOperationException">Thrown when unexpected error occurs.</exception>
     public static unsafe void ReconstructOriginalFromBWT(ReadOnlySpan<ushort> inputString, Span<ushort> outputString,
-        Span<int> temporaryArray, int primaryIndex, Span<int> inputFrequencyTable = default)
+        int primaryIndex, Span<int> inputFrequencyTable = default)
     {
         if (outputString.Length != inputString.Length)
             throw new ArgumentException("Input string and output string must be of the same length.");
         
-        if (temporaryArray.Length < inputString.Length + 1)
-            throw new ArgumentException("Temporary array is shorter than input array.");
-
         int result;
-        
-        fixed (ushort* inputStringPtr = inputString)
-        fixed (ushort* outputStringPtr = outputString)
-        fixed (int* temporaryArrayPtr = temporaryArray)
-        fixed (int* inputFrequencyTablePtr = inputFrequencyTable)
+        var temporaryArray = ArrayPool<byte>.Shared.Rent((inputString.Length + 1) * sizeof(int));
+
+        try
         {
-            result = NativeMethods.libsais16_unbwt(inputStringPtr, outputStringPtr, temporaryArrayPtr,
-                inputString.Length, inputFrequencyTablePtr, primaryIndex);
+            fixed (ushort* inputStringPtr = inputString)
+            fixed (ushort* outputStringPtr = outputString)
+            fixed (int* temporaryArrayPtr = MemoryMarshal.Cast<byte, int>(temporaryArray))
+            fixed (int* inputFrequencyTablePtr = inputFrequencyTable)
+            {
+                result = NativeMethods.libsais16_unbwt(inputStringPtr, outputStringPtr, temporaryArrayPtr,
+                    inputString.Length, inputFrequencyTablePtr, primaryIndex);
+            }
+        }
+        finally
+        {
+            ArrayPool<byte>.Shared.Return(temporaryArray);
         }
 
         if (result != 0)
@@ -280,13 +291,12 @@ public static class LibSais
     /// </summary>
     /// <param name="inputString">[0..n-1] The input 16-bit string.</param>
     /// <param name="outputString">[0..n-1] The output 16-bit string (can be T).</param>
-    /// <param name="temporaryArray">[0..n] The temporary array (NOTE, temporary array must be n + 1 size).</param>
     /// <param name="primaryIndex">The primary index.</param>
     /// <param name="inputFrequencyTable">[0..65535] The input 16-bit symbol frequency table (can be empty/default).</param>
-    /// <exception cref="ArgumentException">Thrown when inputString and outputString lengths do not match, or when temporaryArray is shorter than inputString+1.</exception>
+    /// <exception cref="ArgumentException">Thrown when inputString and outputString lengths do not match.</exception>
     /// <exception cref="InvalidOperationException">Thrown when unexpected error occurs.</exception>
-    public static unsafe void ReconstructOriginalFromBWT(ReadOnlySpan<char> inputString, Span<char> outputString,
-        Span<int> temporaryArray, int primaryIndex, Span<int> inputFrequencyTable = default)
+    public static void ReconstructOriginalFromBWT(ReadOnlySpan<char> inputString, Span<char> outputString,
+        int primaryIndex, Span<int> inputFrequencyTable = default)
         => ReconstructOriginalFromBWT(MemoryMarshal.Cast<char, ushort>(inputString),
-            MemoryMarshal.Cast<char, ushort>(outputString), temporaryArray, primaryIndex, inputFrequencyTable);
+            MemoryMarshal.Cast<char, ushort>(outputString), primaryIndex, inputFrequencyTable);
 }

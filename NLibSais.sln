@@ -4,6 +4,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NLibSais", "src\NLibSais\NL
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NLibSais.NativeAssets", "src\NLibSais.NativeAssets\NLibSais.NativeAssets.csproj", "{371CF580-7755-456A-A4D2-94B21F274F3B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NLibSais.Test", "test\NLibSais.Test\NLibSais.Test.csproj", "{4386CB03-1ED4-46C4-90D6-14FE9F4ABBB2}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -18,5 +20,9 @@ Global
 		{371CF580-7755-456A-A4D2-94B21F274F3B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{371CF580-7755-456A-A4D2-94B21F274F3B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{371CF580-7755-456A-A4D2-94B21F274F3B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4386CB03-1ED4-46C4-90D6-14FE9F4ABBB2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4386CB03-1ED4-46C4-90D6-14FE9F4ABBB2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4386CB03-1ED4-46C4-90D6-14FE9F4ABBB2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4386CB03-1ED4-46C4-90D6-14FE9F4ABBB2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
