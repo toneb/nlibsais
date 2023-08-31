@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 
 namespace NLibSais;
 
-// TODO: auxiliary indexes methods?
+// TODO: auxiliary indexes methods
 // TODO: omp methods
 // TODO: 64-bit methods
 
@@ -26,6 +26,9 @@ public static class LibSais
     {
         if (outputSuffixArray.Length < inputString.Length)
             throw new ArgumentException("Suffix array is shorter than input string.");
+        
+        if (outputFrequencyTable != default && outputFrequencyTable.Length < 256)
+            throw new ArgumentException("Output frequency table is shorter than 256 characters.");
 
         int result;
 
@@ -55,6 +58,9 @@ public static class LibSais
     {
         if (outputSuffixArray.Length < inputString.Length)
             throw new ArgumentException("Suffix array is shorter than input string.");
+        
+        if (outputFrequencyTable != default && outputFrequencyTable.Length < 65536)
+            throw new ArgumentException("Output frequency table is shorter than 65536 characters.");
 
         int result;
 
@@ -118,7 +124,7 @@ public static class LibSais
     /// </summary>
     /// <param name="inputString">[0..n-1] The input string.</param>
     /// <param name="outputString">[0..n-1] The output string (can be the same as inputString).</param>
-    /// <param name="outputFrequencyTable">0..255] The output symbol frequency table (can be empty/default).</param>
+    /// <param name="outputFrequencyTable">[0..255] The output symbol frequency table (can be empty/default).</param>
     /// <returns>The primary index.</returns>
     /// <remarks>Temporary array is rented from shared array pool.</remarks>
     /// <exception cref="ArgumentException">Thrown when inputString and outputString lengths do not match.</exception>
@@ -128,6 +134,9 @@ public static class LibSais
     {
         if (outputString.Length != inputString.Length)
             throw new ArgumentException("Input string and output string must be of the same length.");
+        
+        if (outputFrequencyTable != default && outputFrequencyTable.Length < 256)
+            throw new ArgumentException("Output frequency table is shorter than 256 characters.");
 
         int result;
         var temporaryArray = ArrayPool<byte>.Shared.Rent(inputString.Length * sizeof(int));
@@ -169,6 +178,9 @@ public static class LibSais
     {
         if (outputString.Length != inputString.Length)
             throw new ArgumentException("Input string and output string must be of the same length.");
+        
+        if (outputFrequencyTable != default && outputFrequencyTable.Length < 256)
+            throw new ArgumentException("Output frequency table is shorter than 256 characters.");
 
         int result;
         var temporaryArray = ArrayPool<byte>.Shared.Rent(inputString.Length * sizeof(int));
@@ -224,6 +236,9 @@ public static class LibSais
     {
         if (outputString.Length != inputString.Length)
             throw new ArgumentException("Input string and output string must be of the same length.");
+        
+        if (inputFrequencyTable != default && inputFrequencyTable.Length < 256)
+            throw new ArgumentException("Input frequency table is shorter than 256 characters.");
 
         int result;
         var temporaryArray = ArrayPool<byte>.Shared.Rent((inputString.Length + 1) * sizeof(int));
@@ -263,6 +278,9 @@ public static class LibSais
         if (outputString.Length != inputString.Length)
             throw new ArgumentException("Input string and output string must be of the same length.");
         
+        if (inputFrequencyTable != default && inputFrequencyTable.Length < 256)
+            throw new ArgumentException("Input frequency table is shorter than 256 characters.");
+        
         int result;
         var temporaryArray = ArrayPool<byte>.Shared.Rent((inputString.Length + 1) * sizeof(int));
 
@@ -299,4 +317,112 @@ public static class LibSais
         int primaryIndex, Span<int> inputFrequencyTable = default)
         => ReconstructOriginalFromBWT(MemoryMarshal.Cast<char, ushort>(inputString),
             MemoryMarshal.Cast<char, ushort>(outputString), primaryIndex, inputFrequencyTable);
+
+    /// <summary>
+    /// Constructs the permuted longest common prefix array (PLCP) of a given string and a suffix array.
+    /// </summary>
+    /// <param name="inputString">[0..n-1] The input string.</param>
+    /// <param name="inputSuffixArray">[0..n-1] The input suffix array.</param>
+    /// <param name="outputPLCP">[0..n-1] The output permuted longest common prefix array.</param>
+    /// <exception cref="ArgumentException">Thrown when input lengths do not match.</exception>
+    /// <exception cref="InvalidOperationException">Thrown when unexpected error occurs.</exception>
+    public static unsafe void ConstructPLCP(ReadOnlySpan<byte> inputString, ReadOnlySpan<int> inputSuffixArray,
+        Span<int> outputPLCP)
+    {
+        if (inputString.Length != inputSuffixArray.Length || inputString.Length != outputPLCP.Length)
+            throw new ArgumentException("Input parameters must be of the same length.");
+
+        int result;
+
+        fixed (byte* inputStringPtr = inputString)
+        fixed (int* inputSuffixArrayPtr = inputSuffixArray)
+        fixed (int* outputPLCPPtr = outputPLCP)
+        {
+            result = NativeMethods.libsais_plcp(inputStringPtr, inputSuffixArrayPtr, outputPLCPPtr,
+                inputString.Length);
+        }
+        
+        if (result != 0)
+            throw new InvalidOperationException("Error occured while constructing PLCP.");
+    }
+    
+    /// <summary>
+    /// Constructs the permuted longest common prefix array (PLCP) of a given 16-bit string and a suffix array.
+    /// </summary>
+    /// <param name="inputString">[0..n-1] The input 16-bit string.</param>
+    /// <param name="inputSuffixArray">[0..n-1] The input suffix array.</param>
+    /// <param name="outputPLCP">[0..n-1] The output permuted longest common prefix array.</param>
+    /// <exception cref="ArgumentException">Thrown when input lengths do not match.</exception>
+    /// <exception cref="InvalidOperationException">Thrown when unexpected error occurs.</exception>
+    public static unsafe void ConstructPLCP(ReadOnlySpan<ushort> inputString, ReadOnlySpan<int> inputSuffixArray,
+        Span<int> outputPLCP)
+    {
+        if (inputString.Length != inputSuffixArray.Length || inputString.Length != outputPLCP.Length)
+            throw new ArgumentException("Input parameters must be of the same length.");
+
+        int result;
+
+        fixed (ushort* inputStringPtr = inputString)
+        fixed (int* inputSuffixArrayPtr = inputSuffixArray)
+        fixed (int* outputPLCPPtr = outputPLCP)
+        {
+            result = NativeMethods.libsais16_plcp(inputStringPtr, inputSuffixArrayPtr, outputPLCPPtr,
+                inputString.Length);
+        }
+        
+        if (result != 0)
+            throw new InvalidOperationException("Error occured while constructing PLCP.");
+    }
+
+    /// <summary>
+    /// Constructs the longest common prefix array (LCP) of a given permuted longest common prefix array (PLCP) and a suffix array.
+    /// </summary>
+    /// <param name="inputPLCP">[0..n-1] The input permuted longest common prefix array.</param>
+    /// <param name="inputSuffixArray">[0..n-1] The input suffix array.</param>
+    /// <param name="outputLCP">[0..n-1] The output longest common prefix array (can be SA).</param>
+    /// <exception cref="ArgumentException">Thrown when input lengths do not match.</exception>
+    /// <exception cref="InvalidOperationException">Thrown when unexpected error occurs.</exception>
+    public static unsafe void ConstructLCPu8(ReadOnlySpan<int> inputPLCP, ReadOnlySpan<int> inputSuffixArray, Span<int> outputLCP)
+    {
+        if (inputPLCP.Length != inputSuffixArray.Length || inputPLCP.Length != outputLCP.Length)
+            throw new ArgumentException("Input parameters must be of the same length.");
+
+        int result;
+        
+        fixed (int* inputPLCPPtr = inputPLCP)
+        fixed (int* inputSuffixArrayPtr = inputSuffixArray)
+        fixed (int* outputLCPptr = outputLCP)
+        {
+            result = NativeMethods.libsais_lcp(inputPLCPPtr, inputSuffixArrayPtr, outputLCPptr, inputPLCP.Length);
+        }
+        
+        if (result != 0)
+            throw new InvalidOperationException("Error occured while constructing LCP.");
+    }
+    
+    /// <summary>
+    /// Constructs the longest common prefix array (LCP) of a given permuted longest common prefix array (PLCP) and a suffix array.
+    /// </summary>
+    /// <param name="inputPLCP">[0..n-1] The input permuted longest common prefix array.</param>
+    /// <param name="inputSuffixArray">[0..n-1] The input suffix array.</param>
+    /// <param name="outputLCP">[0..n-1] The output longest common prefix array (can be SA).</param>
+    /// <exception cref="ArgumentException">Thrown when input lengths do not match.</exception>
+    /// <exception cref="InvalidOperationException">Thrown when unexpected error occurs.</exception>
+    public static unsafe void ConstructLCPu16(ReadOnlySpan<int> inputPLCP, ReadOnlySpan<int> inputSuffixArray, Span<int> outputLCP)
+    {
+        if (inputPLCP.Length != inputSuffixArray.Length || inputPLCP.Length != outputLCP.Length)
+            throw new ArgumentException("Input parameters must be of the same length.");
+
+        int result;
+        
+        fixed (int* inputPLCPPtr = inputPLCP)
+        fixed (int* inputSuffixArrayPtr = inputSuffixArray)
+        fixed (int* outputLCPptr = outputLCP)
+        {
+            result = NativeMethods.libsais16_lcp(inputPLCPPtr, inputSuffixArrayPtr, outputLCPptr, inputPLCP.Length);
+        }
+        
+        if (result != 0)
+            throw new InvalidOperationException("Error occured while constructing LCP.");
+    }
 }
