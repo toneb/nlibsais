@@ -12,6 +12,25 @@ namespace NLibSais;
 /// </summary>
 public static class LibSais
 {
+#if NETSTANDARD2_0
+    // handle assembly loading in .NET framework
+    static LibSais()
+    {
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && RuntimeInformation.FrameworkDescription.StartsWith(".NET Framework"))
+        {
+            if (RuntimeInformation.ProcessArchitecture == Architecture.X64)
+                LoadLibraryEx("x64\\libsais.dll", IntPtr.Zero, 0);
+            else if (RuntimeInformation.ProcessArchitecture == Architecture.X86)
+                LoadLibraryEx("x86\\libsais.dll", IntPtr.Zero, 0);
+            else if (RuntimeInformation.ProcessArchitecture == Architecture.Arm64)
+                LoadLibraryEx("arm64\\libsais.dll", IntPtr.Zero, 0);
+        }
+    }
+    
+    [DllImport("kernel32.dll", EntryPoint = "LoadLibraryEx", SetLastError = true)]
+    private static extern nint LoadLibraryEx(string lpFileName, nint hFile, uint dwFlags);
+#endif
+    
     /// <summary>
     /// Constructs the suffix array of a given string.
     /// </summary>

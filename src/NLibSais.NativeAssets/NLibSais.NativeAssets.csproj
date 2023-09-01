@@ -1,24 +1,21 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-      <TargetFrameworks>netstandard2.0;net47</TargetFrameworks>
-      <PackageVersion>1.0.0-experimental1</PackageVersion>
-      <Authors>@toneb</Authors>
-      <Description>.NET cross-platform bindings for libsais - a library for linear time suffix array, longest common prefix array and burrows wheeler transform construction based on induced sorting algorithm. </Description>
-      <PackageProjectUrl>https://github.com/toneb/nlibsais</PackageProjectUrl>
-      <RepositoryUrl>https://github.com/toneb/nlibsais.git</RepositoryUrl>
-      <RepositoryType>git</RepositoryType>
-      <PackageTags>native libsais suffix-array bwt</PackageTags>
-      <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
-      <PackageReadmeFile>README.md</PackageReadmeFile>
+      <TargetFrameworks>netstandard2.0;net461</TargetFrameworks>
+      <PackageTags>native</PackageTags>
+      <IncludeBuildOutput>false</IncludeBuildOutput>
+      <NoWarn>NU5127,NU5128</NoWarn>
     </PropertyGroup>
 
     <ItemGroup>
       <None Include="../../README.md" Pack="true" PackagePath="/" />
 
-      <None Include="NLibSais.NativeAssets.targets" Pack="true" PackagePath="/build/net47/" />
-      <None Include="NLibSais.NativeAssets.targets" Pack="true" PackagePath="/buildTransitive/net47/" />
-        
+      <None Include="NLibSais.NativeAssets.targets" Pack="true" PackagePath="/build/net461/" />
+      <None Include="NLibSais.NativeAssets.targets" Pack="true" PackagePath="/buildTransitive/net461/" />
+
+      <None Include="_._" Pack="true" PackagePath="/lib/netstandard2.0/" />
+      <None Include="_._" Pack="true" PackagePath="/lib/net461/" />
+      
       <None Include="../../build/native-windows/build-x64/Release/libsais.dll" Pack="true" PackagePath="/runtimes/win-x64/native/" />
       <None Include="../../build/native-windows/build-x86/Release/libsais.dll" Pack="true" PackagePath="/runtimes/win-x86/native/" />
       <None Include="../../build/native-windows/build-arm64/Release/libsais.dll" Pack="true" PackagePath="/runtimes/win-arm64/native/" />

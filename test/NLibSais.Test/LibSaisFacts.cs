@@ -66,7 +66,7 @@ public class LibSaisFacts
         
         // SA with frequency table
         var SA2 = new int[testData.Length];
-        var freq1 = new int[65535];
+        var freq1 = new int[65536];
         LibSais.ConstructSuffixArray(testData, SA2, freq1);
         
         // BWT without frequency table
@@ -75,7 +75,7 @@ public class LibSaisFacts
         
         // BWT with frequency table
         var BWT2 = new ushort[testData.Length];
-        var BWT2Freq = new int[65535];
+        var BWT2Freq = new int[65536];
         var bwt2Result = LibSais.ConstructBWT(testData, BWT2, BWT2Freq);
         
         // Reconstruct BWT without frequency table

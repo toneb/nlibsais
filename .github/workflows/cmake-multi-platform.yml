@@ -184,9 +184,21 @@ jobs:
     - name: Build native nuget package
       run: dotnet pack -c Release src/NLibSais.NativeAssets/NLibSais.NativeAssets.csproj
       
-    - name: Upload nuget
+    - name: Upload native nuget
       uses: actions/upload-artifact@v3
       with:
-        name: native-nuget
+        name: nugets
         path: src/NLibSais.NativeAssets/bin/Release/*.nupkg
+        
+    - name: Build managed nuget package
+      run: |
+        mv src/NLibSais.NativeAssets/bin/Release/*.nupkg packages
+        mv build-nuget.config nuget.config
+        dotnet pack -c Release src/NLibSais/NLibSais.csproj
 
+    - name: Upload managed nuget
+      uses: actions/upload-artifact@v3
+      with:
+        name: nugets
+        path: src/NLibSais/bin/Release/*.nupkg
+      

@@ -6,10 +6,11 @@
         <Nullable>enable</Nullable>
         <LangVersion>latest</LangVersion>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <PackageTags>libsais suffix-array bwt</PackageTags>
     </PropertyGroup>
     
     <ItemGroup>
-        <PackageReference Include="NLibSais.NativeAssets" Version="1.0.0-experimental1" />
+        <PackageReference Include="NLibSais.NativeAssets" Version="$(PackageVersion)" />
         <PackageReference Include="System.Memory" Version="4.5.5" Condition="'$(TargetFramework)' == 'netstandard2.0'" />
     </ItemGroup>
 
