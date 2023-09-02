@@ -10,6 +10,10 @@
     </PropertyGroup>
     
     <ItemGroup>
+        <None Include="../../README.md" Pack="true" PackagePath="/" />
+    </ItemGroup>
+    
+    <ItemGroup>
         <PackageReference Include="NLibSais.NativeAssets" Version="$(PackageVersion)" />
         <PackageReference Include="System.Memory" Version="4.5.5" Condition="'$(TargetFramework)' == 'netstandard2.0'" />
     </ItemGroup>
