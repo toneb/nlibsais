@@ -1,5 +1,6 @@
 ﻿# nlibsais
-.NET cross-platform bindings for [libsais](https://github.com/IlyaGrebnov/libsais).
+![Nuget](https://img.shields.io/nuget/v/NLibSais)  
+**NLibSais** is a cross-platform wrapper of [libsais](https://github.com/IlyaGrebnov/libsais) native library.
 
 ## Supported runtimes
 .NET Core 2.0+ (windows, linux, osx) and .NET Framework 4.6.1+ (windows) on following RIDs:
@@ -15,4 +16,3 @@ The nlibsais and libsais are released under the Apache License Version 2.0.
 ## Changes
 * September XX, 2023 (1.0.0)
   * Initial version, bundling libsais 2.7.3
-
