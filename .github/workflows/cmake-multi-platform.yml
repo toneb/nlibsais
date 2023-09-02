@@ -183,23 +183,34 @@ jobs:
 
     - name: Build native nuget package
       run: dotnet pack -c Release src/NLibSais.NativeAssets/NLibSais.NativeAssets.csproj
-      
-    - name: Upload native nuget
-      uses: actions/upload-artifact@v3
-      with:
-        name: nugets
-        path: src/NLibSais.NativeAssets/bin/Release/*.nupkg
-        
+
     - name: Build managed nuget package
       run: |
         mkdir packages
-        mv src/NLibSais.NativeAssets/bin/Release/*.nupkg packages
+        cp src/NLibSais.NativeAssets/bin/Release/*.nupkg packages
         mv build-nuget.config nuget.config
         dotnet pack -c Release src/NLibSais/NLibSais.csproj
 
-    - name: Upload managed nuget
+    - name: Upload nuget artifacts
       uses: actions/upload-artifact@v3
       with:
         name: nugets
-        path: src/NLibSais/bin/Release/*.nupkg
+        path: |
+          src/NLibSais.NativeAssets/bin/Release/*.nupkg
+          src/NLibSais/bin/Release/*.nupkg
+          src/NLibSais/bin/Release/*.snupkg
       
+  publish-nugets:
+    needs: [build-nugets]
+    environment: nuget.org
+    runs-on: windows-latest
+    steps:
+     - name: Download build artifacts
+       uses: actions/download-artifact@v3
+       with:
+         name: nugets
+     
+     - name: Publish to nuget.ord    
+       run: |
+         dotnet push *.nupkg -Source https://api.nuget.org/v3/index.json -apikey ${{ secrets.NUGET_APIKEY }}
+         
