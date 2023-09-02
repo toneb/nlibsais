@@ -192,6 +192,7 @@ jobs:
         
     - name: Build managed nuget package
       run: |
+        mkdir packages
         mv src/NLibSais.NativeAssets/bin/Release/*.nupkg packages
         mv build-nuget.config nuget.config
         dotnet pack -c Release src/NLibSais/NLibSais.csproj
