@@ -5,7 +5,6 @@ namespace NLibSais;
 
 // TODO: auxiliary indexes methods
 // TODO: omp methods
-// TODO: 64-bit methods
 
 /// <summary>
 /// libsais is a library for linear time suffix array, longest common prefix array and burrows wheeler transform construction based on induced sorting algorithm.
@@ -137,12 +136,43 @@ public static class LibSais
         if (result != 0)
             throw new InvalidOperationException("Error occured while constructing suffix array.");
     }
+    
+    /// <summary>
+    /// Constructs the suffix array of a given string. Use only for input strings larger than 2GB.
+    /// </summary>
+    /// <param name="inputString">[0..n-1] The input string.</param>
+    /// <param name="inputStringLength">The length of the given string.</param>
+    /// <param name="outputSuffixArray">[0..n-1+fs] The output array of suffixes. Can optionally include extra space at the end which might be used to improve performance.</param>
+    /// <param name="outputSuffixArrayLength">The length of the suffix array, must be greater or equal to input string length.</param>
+    /// <param name="outputFrequencyTable">[0..255] The output symbol frequency table (can be empty/default).</param>
+    /// <exception cref="ArgumentException">Thrown when outputSuffixArray is shorter than inputString.</exception>
+    /// <exception cref="InvalidOperationException"></exception>
+    public static unsafe void ConstructSuffixArray(byte* inputString, long inputStringLength, long* outputSuffixArray,
+        long outputSuffixArrayLength, Span<long> outputFrequencyTable = default)
+    {
+        if (outputSuffixArrayLength < inputStringLength)
+            throw new ArgumentException("Suffix array is shorter than input string.");
+        
+        if (outputFrequencyTable != default && outputFrequencyTable.Length < 256)
+            throw new ArgumentException("Output frequency table is shorter than 256 characters.");
+
+        long result;
+        
+        fixed (long* outputFrequencyTablePtr = outputFrequencyTable)
+        {
+            result = NativeMethods.libsais64(inputString, outputSuffixArray, inputStringLength,
+                outputSuffixArrayLength - inputStringLength, outputFrequencyTablePtr);
+        }
+
+        if (result != 0)
+            throw new InvalidOperationException("Error occured while constructing suffix array.");
+    }
 
     /// <summary>
     /// Constructs the burrows-wheeler transformed string (BWT) of a given string.
     /// </summary>
     /// <param name="inputString">[0..n-1] The input string.</param>
-    /// <param name="outputString">[0..n-1] The output string (can be the same as inputString).</param>
+    /// <param name="outputString">[0..n-1] The output string (can be inputString).</param>
     /// <param name="outputFrequencyTable">[0..255] The output symbol frequency table (can be empty/default).</param>
     /// <returns>The primary index.</returns>
     /// <remarks>Temporary array is rented from shared array pool.</remarks>
@@ -187,7 +217,7 @@ public static class LibSais
     /// Constructs the burrows-wheeler transformed 16-bit string (BWT) of a given 16-bit string.
     /// </summary>
     /// <param name="inputString">[0..n-1] The input 16-bit string.</param>
-    /// <param name="outputString">[0..n-1] The output 16-bit string (can be the same as inputString).</param>
+    /// <param name="outputString">[0..n-1] The output 16-bit string (can be inputString).</param>
     /// <param name="outputFrequencyTable">[0..255] The output symbol frequency table (can be empty/default).</param>
     /// <returns>The primary index.</returns>
     /// <exception cref="ArgumentException">Thrown when inputString and outputString lengths do not match.</exception>
@@ -231,7 +261,7 @@ public static class LibSais
     /// Constructs the burrows-wheeler transformed 16-bit string (BWT) of a given 16-bit string.
     /// </summary>
     /// <param name="inputString">[0..n-1] The input 16-bit string.</param>
-    /// <param name="outputString">[0..n-1] The output 16-bit string (can be the same as inputString).</param>
+    /// <param name="outputString">[0..n-1] The output 16-bit string (can be inputString).</param>
     /// <param name="outputFrequencyTable">[0..255] The output symbol frequency table (can be empty/default).</param>
     /// <returns>The primary index.</returns>
     /// <exception cref="ArgumentException">Thrown when inputString and outputString lengths do not match.</exception>
@@ -240,6 +270,43 @@ public static class LibSais
         Span<int> outputFrequencyTable = default)
         => ConstructBWT(MemoryMarshal.Cast<char, ushort>(inputString), 
             MemoryMarshal.Cast<char, ushort>(outputString), outputFrequencyTable);
+
+    /// <summary>
+    /// Constructs the burrows-wheeler transformed string (BWT) of a given string. Use only for input strings larger than 2GB.
+    /// </summary>
+    /// <param name="inputString">[0..n-1] The input string.</param>
+    /// <param name="outputString">[0..n-1] The output string (can be inputString).</param>
+    /// <param name="stringLength">The length of the given string.</param>
+    /// <param name="outputFrequencyTable">[0..255] The output symbol frequency table (can be NULL).</param>
+    /// <returns>The primary index.</returns>
+    /// <exception cref="ArgumentException">Thrown when outputFrequencyTable is shorter than 256 entries.</exception>
+    /// <exception cref="InvalidOperationException">Thrown when unexpected error occurs.</exception>
+    public static unsafe long ConstructBWT(byte* inputString, byte* outputString, long stringLength,
+        Span<long> outputFrequencyTable = default)
+    {
+        long* temporaryArray = (long*)Marshal.AllocHGlobal((nint)stringLength * sizeof(long));
+        
+        if (outputFrequencyTable != default && outputFrequencyTable.Length < 256)
+            throw new ArgumentException("Output frequency table is shorter than 256 characters.");
+        
+        try
+        {
+            fixed (long* outputFrequencyTablePtr = outputFrequencyTable)
+            {
+                long result = NativeMethods.libsais64_bwt(inputString, outputString, temporaryArray,
+                    stringLength, 0, outputFrequencyTablePtr);
+                
+                if (result < 0)
+                    throw new InvalidOperationException("Error occured while constructing BWT.");
+                
+                return result;
+            }
+        }
+        finally
+        {
+            Marshal.FreeHGlobal((IntPtr)temporaryArray);
+        }
+    }
 
     /// <summary>
     /// Constructs the original string from a given burrows-wheeler transformed string (BWT) with primary index.
@@ -286,7 +353,7 @@ public static class LibSais
     /// Constructs the original 16-bit string from a given burrows-wheeler transformed 16-bit string (BWT) with primary index.
     /// </summary>
     /// <param name="inputString">[0..n-1] The input 16-bit string.</param>
-    /// <param name="outputString">[0..n-1] The output 16-bit string (can be T).</param>
+    /// <param name="outputString">[0..n-1] The output 16-bit string (can be inputString).</param>
     /// <param name="primaryIndex">The primary index.</param>
     /// <param name="inputFrequencyTable">[0..65535] The input 16-bit symbol frequency table (can be empty/default).</param>
     /// <exception cref="ArgumentException">Thrown when inputString and outputString lengths do not match.</exception>
@@ -327,7 +394,7 @@ public static class LibSais
     /// Constructs the original 16-bit string from a given burrows-wheeler transformed 16-bit string (BWT) with primary index.
     /// </summary>
     /// <param name="inputString">[0..n-1] The input 16-bit string.</param>
-    /// <param name="outputString">[0..n-1] The output 16-bit string (can be T).</param>
+    /// <param name="outputString">[0..n-1] The output 16-bit string (can be inputString).</param>
     /// <param name="primaryIndex">The primary index.</param>
     /// <param name="inputFrequencyTable">[0..65535] The input 16-bit symbol frequency table (can be empty/default).</param>
     /// <exception cref="ArgumentException">Thrown when inputString and outputString lengths do not match.</exception>
@@ -336,6 +403,41 @@ public static class LibSais
         int primaryIndex, Span<int> inputFrequencyTable = default)
         => ReconstructOriginalFromBWT(MemoryMarshal.Cast<char, ushort>(inputString),
             MemoryMarshal.Cast<char, ushort>(outputString), primaryIndex, inputFrequencyTable);
+    
+    /// <summary>
+    /// Constructs the original string from a given burrows-wheeler transformed string (BWT) with primary index. Use only for input strings larger than 2GB.
+    /// </summary>
+    /// <param name="inputString">[0..n-1] The input string.</param>
+    /// <param name="outputString">[0..n-1] The output string (can be inputString).</param>
+    /// <param name="stringLength">The length of the given string.</param>
+    /// <param name="primaryIndex">The primary index.</param>
+    /// <param name="inputFrequencyTable">[0..255] The input symbol frequency table (can be empty/default).</param>
+    /// <exception cref="ArgumentException">Thrown when inputFrequencyTable is shorter than 256 entries.</exception>
+    /// <exception cref="InvalidOperationException">Thrown when unexpected error occurs.</exception>
+    public static unsafe void ReconstructOriginalFromBWT(byte* inputString, byte* outputString, long stringLength,
+        long primaryIndex, Span<long> inputFrequencyTable = default)
+    {
+        long* temporaryArray = (long*)Marshal.AllocHGlobal((nint)(stringLength + 1) * sizeof(long));
+        
+        if (inputFrequencyTable != default && inputFrequencyTable.Length < 256)
+            throw new ArgumentException("Input frequency table is shorter than 256 characters.");
+        
+        try
+        {
+            fixed (long* inputFrequencyTablePtr = inputFrequencyTable)
+            {
+                long result = NativeMethods.libsais64_unbwt(inputString, outputString, temporaryArray,
+                    stringLength, inputFrequencyTablePtr, primaryIndex);
+                
+                if (result != 0)
+                    throw new InvalidOperationException("Error occured while reconstructing original string from BWT.");
+            }
+        }
+        finally
+        {
+            Marshal.FreeHGlobal((nint)temporaryArray);
+        }
+    }
 
     /// <summary>
     /// Constructs the permuted longest common prefix array (PLCP) of a given string and a suffix array.
@@ -392,6 +494,23 @@ public static class LibSais
         if (result != 0)
             throw new InvalidOperationException("Error occured while constructing PLCP.");
     }
+    
+    /// <summary>
+    /// Constructs the permuted longest common prefix array (PLCP) of a given string and a suffix array. Use only for input strings larger than 2GB.
+    /// </summary>
+    /// <param name="inputString">[0..n-1] The input string.</param>
+    /// <param name="inputSuffixArray">[0..n-1] The input suffix array.</param>
+    /// <param name="outputPLCP">[0..n-1] The output permuted longest common prefix array.</param>
+    /// <param name="stringLength">The length of the string and the suffix array.</param>
+    /// <exception cref="InvalidOperationException">Thrown when unexpected error occurs.</exception>
+    public static unsafe void ConstructPLCP(byte* inputString, long* inputSuffixArray, long* outputPLCP,
+        long stringLength)
+    {
+        long result = NativeMethods.libsais64_plcp(inputString, inputSuffixArray, outputPLCP, stringLength);
+        
+        if (result != 0)
+            throw new InvalidOperationException("Error occured while constructing PLCP.");
+    }
 
     /// <summary>
     /// Constructs the longest common prefix array (LCP) of a given permuted longest common prefix array (PLCP) and a suffix array.
@@ -414,6 +533,23 @@ public static class LibSais
         {
             result = NativeMethods.libsais_lcp(inputPLCPPtr, inputSuffixArrayPtr, outputLCPptr, inputPLCP.Length);
         }
+        
+        if (result != 0)
+            throw new InvalidOperationException("Error occured while constructing LCP.");
+    }
+
+    /// <summary>
+    /// Constructs the longest common prefix array (LCP) of a given permuted longest common prefix array (PLCP) and a suffix array. Use only for input strings larger than 2GB.
+    /// </summary>
+    /// <param name="inputPLCP">[0..n-1] The input permuted longest common prefix array.</param>
+    /// <param name="inputSuffixArray">[0..n-1] The input suffix array.</param>
+    /// <param name="outputLCP">[0..n-1] The output longest common prefix array (can be SA).</param>
+    /// <param name="stringLength">The length of the permuted longest common prefix array and the suffix array.</param>
+    /// <exception cref="InvalidOperationException">Thrown when unexpected error occurs.</exception>
+    public static unsafe void ConstructLCPu8(long* inputPLCP, long* inputSuffixArray, long* outputLCP,
+        long stringLength)
+    {
+        long result = NativeMethods.libsais64_lcp(inputPLCP, inputSuffixArray, outputLCP, stringLength);
         
         if (result != 0)
             throw new InvalidOperationException("Error occured while constructing LCP.");
