@@ -212,5 +212,6 @@ jobs:
      
      - name: Publish to nuget.ord    
        run: |
-         dotnet nuget push *.nupkg --source https://api.nuget.org/v3/index.json --api-key ${{ secrets.NUGET_APIKEY }}
+         ls
+         dotnet nuget push "**/*.nupkg" --source https://api.nuget.org/v3/index.json --api-key ${{ secrets.NUGET_APIKEY }}
          
