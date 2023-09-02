@@ -1,7 +1,9 @@
-﻿using System.Runtime.InteropServices;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Runtime.InteropServices;
 
 namespace NLibSais;
 
+[SuppressMessage("Security", "CA5393: Do not use unsafe DllImportSearchPath value", Justification = "We need to load native dependency from the same directory as the assembly.")]
 internal static class NativeMethods
 {
     /// <summary>
@@ -14,6 +16,7 @@ internal static class NativeMethods
     /// <param name="freq">[0..255] The output symbol frequency table (can be NULL).</param>
     /// <returns>0 if no error occurred, -1 or -2 otherwise.</returns>
     [DllImport("libsais.dll", EntryPoint = "libsais", ExactSpelling = true)]
+    [DefaultDllImportSearchPaths(DllImportSearchPath.AssemblyDirectory)]
     public static extern unsafe int libsais(byte* T, int* SA, int n, int fs, int* freq);
     
     /// <summary>
@@ -27,6 +30,7 @@ internal static class NativeMethods
     /// <param name="fs">Extra space available at the end of SA array (can be 0, but 4k or better 6k is recommended for optimal performance).</param>
     /// <returns>0 if no error occurred, -1 or -2 otherwise.</returns>
     [DllImport("libsais.dll", EntryPoint = "libsais_int", ExactSpelling = true)]
+    [DefaultDllImportSearchPaths(DllImportSearchPath.AssemblyDirectory)]
     public static extern unsafe int libsais_int(int* T, int* SA, int n, int k, int fs);
     
     /// <summary>
@@ -40,6 +44,7 @@ internal static class NativeMethods
     /// <param name="freq">[0..255] The output symbol frequency table (can be NULL).</param>
     /// <returns>The primary index if no error occurred, -1 or -2 otherwise.</returns>
     [DllImport("libsais.dll", EntryPoint = "libsais_bwt", ExactSpelling = true)]
+    [DefaultDllImportSearchPaths(DllImportSearchPath.AssemblyDirectory)]
     public static extern unsafe int libsais_bwt(byte* T, byte* U, int* A, int n, int fs, int* freq);
     
     /// <summary>
@@ -55,6 +60,7 @@ internal static class NativeMethods
     /// <param name="I">[0..(n-1)/r] The output auxiliary indexes.</param>
     /// <returns>0 if no error occurred, -1 or -2 otherwise.</returns>
     [DllImport("libsais.dll", EntryPoint = "libsais_bwt_aux", ExactSpelling = true)]
+    [DefaultDllImportSearchPaths(DllImportSearchPath.AssemblyDirectory)]
     public static extern unsafe int libsais_bwt_aux(byte* T, byte* U, int* A, int n, int fs, int* freq, int r, int* I);
     
     /// <summary>
@@ -68,6 +74,7 @@ internal static class NativeMethods
     /// <param name="i">The primary index.</param>
     /// <returns>0 if no error occurred, -1 or -2 otherwise.</returns>
     [DllImport("libsais.dll", EntryPoint = "libsais_unbwt", ExactSpelling = true)]
+    [DefaultDllImportSearchPaths(DllImportSearchPath.AssemblyDirectory)]
     public static extern unsafe int libsais_unbwt(byte* T, byte* U, int* A, int n, int* freq, int i);
     
     /// <summary>
@@ -82,6 +89,7 @@ internal static class NativeMethods
     /// <param name="I">[0..(n-1)/r] The input auxiliary indexes.</param>
     /// <returns></returns>
     [DllImport("libsais.dll", EntryPoint = "libsais_unbwt_aux", ExactSpelling = true)]
+    [DefaultDllImportSearchPaths(DllImportSearchPath.AssemblyDirectory)]
     public static extern unsafe int libsais_unbwt_aux(byte* T, byte* U, int* A, int n, int* freq, int r, int* I);
     
     /// <summary>
@@ -93,6 +101,7 @@ internal static class NativeMethods
     /// <param name="n">The length of the string and the suffix array.</param>
     /// <returns>0 if no error occurred, -1 otherwise.</returns>
     [DllImport("libsais.dll", EntryPoint = "libsais_plcp", ExactSpelling = true)]
+    [DefaultDllImportSearchPaths(DllImportSearchPath.AssemblyDirectory)]
     public static extern unsafe int libsais_plcp(byte* T, int* SA, int* PLCP, int n);
     
     /// <summary>
@@ -104,6 +113,7 @@ internal static class NativeMethods
     /// <param name="n">The length of the permuted longest common prefix array and the suffix array.</param>
     /// <returns>0 if no error occurred, -1 otherwise.</returns>
     [DllImport("libsais.dll", EntryPoint = "libsais_lcp", ExactSpelling = true)]
+    [DefaultDllImportSearchPaths(DllImportSearchPath.AssemblyDirectory)]
     public static extern unsafe int libsais_lcp(int* PLCP, int* SA, int* LCP, int n);
     
     /// <summary>
@@ -116,6 +126,7 @@ internal static class NativeMethods
     /// <param name="freq">[0..65535] The output 16-bit symbol frequency table (can be NULL).</param>
     /// <returns>0 if no error occurred, -1 or -2 otherwise.</returns>
     [DllImport("libsais.dll", EntryPoint = "libsais16", ExactSpelling = true)]
+    [DefaultDllImportSearchPaths(DllImportSearchPath.AssemblyDirectory)]
     public static extern unsafe int libsais16(ushort* T, int* SA, int n, int fs, int* freq);
     
     /// <summary>
@@ -129,6 +140,7 @@ internal static class NativeMethods
     /// <param name="freq">[0..65535] The output 16-bit symbol frequency table (can be NULL).</param>
     /// <returns>The primary index if no error occurred, -1 or -2 otherwise.</returns>
     [DllImport("libsais.dll", EntryPoint = "libsais16_bwt", ExactSpelling = true)]
+    [DefaultDllImportSearchPaths(DllImportSearchPath.AssemblyDirectory)]
     public static extern unsafe int libsais16_bwt(ushort* T, ushort* U, int* A, int n, int fs, int* freq);
     
     /// <summary>
@@ -144,6 +156,7 @@ internal static class NativeMethods
     /// <param name="I">[0..(n-1)/r] The output auxiliary indexes.</param>
     /// <returns>0 if no error occurred, -1 or -2 otherwise.</returns>
     [DllImport("libsais.dll", EntryPoint = "libsais16_bwt_aux", ExactSpelling = true)]
+    [DefaultDllImportSearchPaths(DllImportSearchPath.AssemblyDirectory)]
     public static extern unsafe int libsais16_bwt_aux(ushort* T, ushort* U, int* A, int n, int fs, int* freq, int r, int* I);
     
     /// <summary>
@@ -157,6 +170,7 @@ internal static class NativeMethods
     /// <param name="i">The primary index.</param>
     /// <returns>0 if no error occurred, -1 or -2 otherwise.</returns>
     [DllImport("libsais.dll", EntryPoint = "libsais16_unbwt", ExactSpelling = true)]
+    [DefaultDllImportSearchPaths(DllImportSearchPath.AssemblyDirectory)]
     public static extern unsafe int libsais16_unbwt(ushort* T, ushort* U, int* A, int n, int* freq, int i);
     
     /// <summary>
@@ -171,6 +185,7 @@ internal static class NativeMethods
     /// <param name="I">[0..(n-1)/r] The input auxiliary indexes.</param>
     /// <returns>0 if no error occurred, -1 or -2 otherwise.</returns>
     [DllImport("libsais.dll", EntryPoint = "libsais16_unbwt_aux", ExactSpelling = true)]
+    [DefaultDllImportSearchPaths(DllImportSearchPath.AssemblyDirectory)]
     public static extern unsafe int libsais16_unbwt_aux(ushort* T, ushort* U, int* A, int n, int* freq, int r, int* I);
     
     /// <summary>
@@ -182,6 +197,7 @@ internal static class NativeMethods
     /// <param name="n">The length of the 16-bit string and the suffix array.</param>
     /// <returns>0 if no error occurred, -1 otherwise.</returns>
     [DllImport("libsais.dll", EntryPoint = "libsais16_plcp", ExactSpelling = true)]
+    [DefaultDllImportSearchPaths(DllImportSearchPath.AssemblyDirectory)]
     public static extern unsafe int libsais16_plcp(ushort* T, int* SA, int* PLCP, int n);
     
     /// <summary>
@@ -193,6 +209,7 @@ internal static class NativeMethods
     /// <param name="n">The length of the permuted longest common prefix array and the suffix array.</param>
     /// <returns>0 if no error occurred, -1 otherwise.</returns>
     [DllImport("libsais.dll", EntryPoint = "libsais16_lcp", ExactSpelling = true)]
+    [DefaultDllImportSearchPaths(DllImportSearchPath.AssemblyDirectory)]
     public static extern unsafe int libsais16_lcp(int* PCLP, int* SA, int* LCP, int n);
 
     /// <summary>
@@ -205,6 +222,7 @@ internal static class NativeMethods
     /// <param name="freq">[0..255] The output symbol frequency table (can be NULL).</param>
     /// <returns>0 if no error occurred, -1 or -2 otherwise.</returns>
     [DllImport("libsais.dll", EntryPoint = "libsais64", ExactSpelling = true)]
+    [DefaultDllImportSearchPaths(DllImportSearchPath.AssemblyDirectory)]
     public static extern unsafe long libsais64(byte* T, long* SA, long n, long fs, long* freq);
     
     /// <summary>
@@ -218,6 +236,7 @@ internal static class NativeMethods
     /// <param name="freq">[0..255] The output symbol frequency table (can be NULL).</param>
     /// <returns>The primary index if no error occurred, -1 or -2 otherwise.</returns>
     [DllImport("libsais.dll", EntryPoint = "libsais64_bwt", ExactSpelling = true)]
+    [DefaultDllImportSearchPaths(DllImportSearchPath.AssemblyDirectory)]
     public static extern unsafe long libsais64_bwt(byte* T, byte* U, long* A, long n, long fs, long* freq);
     
     /// <summary>
@@ -233,6 +252,7 @@ internal static class NativeMethods
     /// <param name="I">[0..(n-1)/r] The output auxiliary indexes.</param>
     /// <returns>0 if no error occurred, -1 or -2 otherwise.</returns>
     [DllImport("libsais.dll", EntryPoint = "libsais64_bwt_aux", ExactSpelling = true)]
+    [DefaultDllImportSearchPaths(DllImportSearchPath.AssemblyDirectory)]
     public static extern unsafe long libsais64_bwt_aux(byte* T, byte* U, long* A, long n, long fs, long* freq, long r, long* I);
     
     /// <summary>
@@ -246,6 +266,7 @@ internal static class NativeMethods
     /// <param name="i">The primary index.</param>
     /// <returns>0 if no error occurred, -1 or -2 otherwise.</returns>
     [DllImport("libsais.dll", EntryPoint = "libsais64_unbwt", ExactSpelling = true)]
+    [DefaultDllImportSearchPaths(DllImportSearchPath.AssemblyDirectory)]
     public static extern unsafe long libsais64_unbwt(byte* T, byte* U, long* A, long n, long* freq, long i);
     
     /// <summary>
@@ -260,6 +281,7 @@ internal static class NativeMethods
     /// <param name="I">[0..(n-1)/r] The input auxiliary indexes.</param>
     /// <returns>0 if no error occurred, -1 or -2 otherwise.</returns>
     [DllImport("libsais.dll", EntryPoint = "libsais64_unbwt_aux", ExactSpelling = true)]
+    [DefaultDllImportSearchPaths(DllImportSearchPath.AssemblyDirectory)]
     public static extern unsafe long libsais64_unbwt_aux(byte* T, byte* U, long* A, long n, long* freq, long r, long* I);
     
     /// <summary>
@@ -271,6 +293,7 @@ internal static class NativeMethods
     /// <param name="n">The length of the string and the suffix array.</param>
     /// <returns>0 if no error occurred, -1 otherwise.</returns>
     [DllImport("libsais.dll", EntryPoint = "libsais64_plcp", ExactSpelling = true)]
+    [DefaultDllImportSearchPaths(DllImportSearchPath.AssemblyDirectory)]
     public static extern unsafe long libsais64_plcp(byte* T, long* SA, long* PLCP, long n);
     
     /// <summary>
@@ -282,5 +305,6 @@ internal static class NativeMethods
     /// <param name="n">The length of the permuted longest common prefix array and the suffix array.</param>
     /// <returns>0 if no error occurred, -1 otherwise.</returns>
     [DllImport("libsais.dll", EntryPoint = "libsais64_lcp", ExactSpelling = true)]
+    [DefaultDllImportSearchPaths(DllImportSearchPath.AssemblyDirectory)]
     public static extern unsafe long libsais64_lcp(long* PLCP, long* SA, long* LCP, long n);
 }

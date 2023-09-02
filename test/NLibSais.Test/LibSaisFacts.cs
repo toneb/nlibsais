@@ -1,7 +1,9 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.InteropServices;
 
 namespace NLibSais.Test;
 
+[SuppressMessage("Security", "CA5394: Do not use insecure randomness", Justification = "Test code")]
 public class LibSaisFacts
 {
     [Fact]
