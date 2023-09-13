@@ -140,7 +140,7 @@ jobs:
         -DLIBSAIS_BUILD_SHARED_LIB=ON
         -DCMAKE_C_FLAGS="-Ofast"
         -DCMAKE_SHARED_LIBRARY_PREFIX_C=""
-        -DCMAKE_SYSTEM_PROCESSOR=x86_64
+        -DCMAKE_OSX_ARCHITECTURES=x86_64
         -S libsais
 
     - name: Build x64
@@ -153,7 +153,7 @@ jobs:
         -DLIBSAIS_BUILD_SHARED_LIB=ON
         -DCMAKE_C_FLAGS="-Ofast"
         -DCMAKE_SHARED_LIBRARY_PREFIX_C=""
-        -DCMAKE_SYSTEM_PROCESSOR=arm64
+        -DCMAKE_OSX_ARCHITECTURES=arm64
         -S libsais
 
     - name: Build arm64
