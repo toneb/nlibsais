@@ -2,7 +2,7 @@
     <PropertyGroup>
         <Version>1.0.0</Version>
         <FileVersion>1.0.0</FileVersion>
-        <PackageVersion>1.0.0-experimental6</PackageVersion>
+        <PackageVersion>1.0.0</PackageVersion>
         <Authors>@toneb</Authors>
         <Description>.NET cross-platform bindings for libsais - a library for linear time suffix array, longest common prefix array and burrows wheeler transform construction based on induced sorting algorithm. </Description>
         <PackageProjectUrl>https://github.com/toneb/nlibsais</PackageProjectUrl>

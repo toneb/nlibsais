@@ -14,5 +14,5 @@ This library ships native [libsais](https://github.com/IlyaGrebnov/libsais) libr
 The nlibsais and libsais are released under the Apache License Version 2.0.
 
 ## Changes
-* September XX, 2023 (1.0.0)
+* September 14, 2023 (1.0.0)
   * Initial version, bundling libsais 2.7.3
